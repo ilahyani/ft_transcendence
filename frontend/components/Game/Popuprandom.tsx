@@ -1,5 +1,5 @@
 "use client";
-import PongAnimation from "/Users/yamzil/Desktop/ft_transcendence/frontend/public/img/PongAnimation.json";
+import PongAnimation from "../../public/img/PongAnimation.json";
 import { useRouter } from "next/navigation";
 import Lottie from "lottie-react";
 

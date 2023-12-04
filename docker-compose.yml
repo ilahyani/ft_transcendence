@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  database:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5434:5432
+    env_file: 
+      - backend/.env
+    restart: on-failure
+
+  frontend:
+    image: node:16
+    container_name: frontend
+    working_dir: /app
+    command: bash -c "npm install && npm run build && npm run dev -- -p 3001"
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3001:3001"
+    networks:
+      - ping-pong
+
+  backend:
+    image: node:16
+    container_name: backend
+    working_dir: /app
+    command: bash -c "npm install && npm run build && npm run start:dev"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    networks:
+      - ping-pong
+    depends_on: 
+      - database
+
+networks:
+  ping-pong:
+    driver: bridge
