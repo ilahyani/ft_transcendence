@@ -1,13 +1,9 @@
-# FROM node:latest
+FROM node:20
 
-# WORKDIR /app
+WORKDIR /app
 
-# RUN apt-get update && apt-get install -y build-essential
+COPY package*.json ./
 
-# COPY package*.json /app
+COPY . .
 
-# RUN npm install
-
-# COPY . .
-
-# CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev"]

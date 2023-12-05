@@ -1,11 +1,11 @@
-# FROM node:latest
+FROM node:20
 
-# WORKDIR /app
+WORKDIR /app
 
-# COPY package*.json /app
+COPY package*.json /app
 
-# COPY . .
+COPY . .
 
-# RUN npm install
 
-# CMD ["npm", "run", "dev", "--", "-p", "3001"]
+
+CMD ["npm", "run", "dev", "--", "-p", "3001"]
