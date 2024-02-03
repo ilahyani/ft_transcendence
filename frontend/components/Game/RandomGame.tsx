@@ -1,10 +1,12 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState,  } from "react";
 import { Socket, io } from "socket.io-client";
 import cookie from "js-cookie";
 import Countdown from "./countdown";
 import { Player, Net } from "../../types";
 import axios from "axios";
+import { useAuth } from "../../app/context/AuthContext";
+import { useSocket } from "../../app/context/SocketContext";
 
 const canvasWidth = 1080;
 const canvasHeight = 720;
@@ -76,10 +78,13 @@ export default function RandomMatch({
   setOpponnetAvatr,
 }: any) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [socket, setSocket] = useState<Socket>();
+  // const [socket, setSocket] = useState<Socket>();
   const [playerY, setPlayerY] = useState(canvasHeight / 2 - 50);
   const [openentY, setOpenentY] = useState(canvasHeight / 2 - 50);
   const [theme, setTheme] = useState("");
+  const {state} = useAuth();
+  const { socket } = useSocket();
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,6 +106,11 @@ export default function RandomMatch({
     fetchData();
   }, []);
 
+  useEffect(() => {
+    console.log("state", state.user.gameTheme);
+  }, [state]);
+
+  // add to auth context
   const upadateTotalWinsAndLoses = async (
     winnerId: string,
     loserId: string
@@ -223,6 +233,7 @@ export default function RandomMatch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown, playerY, openentY, ballX, ballY, startCountDown]);
 
+  // should i add it to socket cinext
   const keyPress = (e: any) => {
     if (e.keyCode === 38) {
       socket?.emit("move", {
@@ -239,28 +250,20 @@ export default function RandomMatch({
     }
   };
 
-  useEffect(() => {
-    const socketIo: Socket = io("http://localhost:3000/game", {
-      auth: {
-        token: cookie.get("USER_ID"),
-      },
-    });
-    setSocket(socketIo);
-    return () => {
-      window?.removeEventListener("keydown", keyPress);
-      socketIo.disconnect();
-    };
-  }, []);
 
+
+  // check the router to check the emit event
   useEffect(() => {
     if (!socket) return;
     window?.addEventListener("keydown", keyPress);
     socket.emit("RandomMatch", { player: cookie.get("USER_ID"), room: room });
     return () => {
       socket?.disconnect();
+      window?.removeEventListener("keydown", keyPress);
     };
   }, [socket]);
 
+  // should i add it to socket context
   useEffect(() => {
     if (socket) {
       socket.on("RandomMatch", (data: any) => {
