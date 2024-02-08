@@ -1,36 +1,25 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useSocketGame } from '../../app/context/GameContext';
 
-interface ScoreBoardProps {
-  playerScore: number;
-  opponentScore: number;
-  playerAvatar: string;
-  OpponentAvatar: string;
-}
 
-export default function ScoreBoard({
-  playerScore,
-  opponentScore,
-  playerAvatar,
-  OpponentAvatar,
-}: ScoreBoardProps) {
+export default function ScoreBoard( ) {
   const router = useRouter();
-
-
+  const { initialState} = useSocketGame();
   return (
     <>
       <div className="flex justify-between items-center p-5 ml-0 my-5  mr-40">
         <div className="flex items-center justify-center gap-1 ">
           <Image
             className="rounded-full"
-            src={playerAvatar}
+            src=""
             width={55}
             height={55}
             alt="Friend's picture"
           />
           <span className="mx-2 text-text text-center text-5xl font-bold">
-            {playerScore}
+            
           </span>
         </div>
         <button className="inline-flex items-center h-12 bg-primary rounded-3xl p-4 px-14 gap-3">
@@ -74,11 +63,11 @@ export default function ScoreBoard({
         </button>
         <div className="flex items-center justify-center gap-1">
           <span className="mx-2 text-text text-center text-5xl font-bold">
-            {opponentScore}
+            
           </span>
           <Image
             className="rounded-full"
-            src={OpponentAvatar}
+            src=""
             width={55}
             height={55}
             alt="Friend's picture"

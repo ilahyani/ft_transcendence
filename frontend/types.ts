@@ -4,7 +4,7 @@ export interface User {
   avatar: string;
 }
 
-export interface Player {
+export interface PlayerType {
 	// id: string;
 	x: number;
 	y: number;

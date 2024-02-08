@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useAuth } from "./context/AuthContext";
 
+
 const withAuth = (WrappedComponent: React.ComponentType<any>) => {
   const Wrapper = (props: any) => {
     const router = useRouter();

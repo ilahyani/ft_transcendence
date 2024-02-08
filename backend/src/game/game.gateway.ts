@@ -57,7 +57,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         id: playerId,
         socket: this.mapSocketToPlayer.get(playerId),
         x: 10,
-        y: this.canvasHeight / 2 - 75,
+        y: this.canvasHeight / 2 - 110,
         score: 0,
         width: 20,
         velocityY: 0,

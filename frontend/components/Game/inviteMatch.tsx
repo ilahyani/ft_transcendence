@@ -6,69 +6,13 @@ import { useParams } from "next/navigation";
 import Countdown from "./countdown";
 import { Player, Net } from "../../types";
 import axios from "axios";
+import { useAuth } from "../../app/context/AuthContext";
+import { useSocket } from "../../app/context/SocketContext";
 
 const canvasWidth = 1080;
 const canvasHeight = 720;
 
-// draw the table
-const drawTable = (
-  context: any,
-  canvas: any,
-  x: number,
-  y: number,
-  color: string
-) => {
-  context.fillStyle = color;
-  context.fillRect(0, 0, canvasWidth, canvasHeight);
-};
 
-// draw the ball
-const drawBall = (context: any, x: number, y: number, color: string) => {
-  context.fillStyle = color;
-  context.beginPath();
-  context.arc(x, y, 20, 0, 2 * Math.PI, false);
-  context.closePath();
-  context.fill();
-};
-
-// draw the rectangle aka the paddle
-const drawRect = (
-  context: any,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  color: string
-) => {
-  context.beginPath();
-  context.roundRect(x, y, width, height, 10);
-  context.fillStyle = color;
-  context.fill();
-  context.closePath();
-};
-
-// draw the net
-const drawNet = (
-  context: any,
-  canvas: any,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  color: string
-) => {
-  for (let i = 0; i <= canvasHeight; i += 20) {
-    drawRect(context, x, y + i, width, height, color);
-  }
-};
-
-let net: Net = {
-  x: canvasWidth / 2 - 2 / 2,
-  y: 0,
-  width: 5,
-  height: 10,
-  color: "white",
-};
 
 interface Props {
   setPlayerScore: (playerScore: number) => void;
@@ -83,10 +27,8 @@ export default function InviteMatch({
 }: Props) {
   const { id } = useParams();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [socket, setSocket] = useState<Socket>();
-  const [playerY, setPlayerY] = useState(canvasHeight / 2 - 50);
-  const [openentY, setOpenentY] = useState(canvasHeight / 2 - 50);
-  const [theme, setTheme] = useState("");
+  const { state, getWinnerAndLoser } = useAuth();
+  const { socket } = useSocket();
   const Player: Player = {
     x: 10,
     y: canvasHeight / 2 - 50,
@@ -108,57 +50,10 @@ export default function InviteMatch({
   const [startCountDown, setStartCountDown] = useState(false);
   let room = "";
 
-  useEffect(() => {
-    const fetchData = () => {
-      axios
-        .get(`http://localhost:3000/user/profile`, {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-            Accept: "application/json",
-          },
-        })
-        .then((res) => {
-          setTheme(res.data.gameTheme);
-        })
-        .catch((error) => {
-          console.log("Error", error.response.data);
-        });
-    };
-    fetchData();
-  }, []);
-
-  const upadateTotalWinsAndLoses = async (
-    winnerId: string,
-    loserId: string
-  ) => {
-    await axios
-      .post(
-        `http://localhost:3000/game/endGame`,
-        {
-          winnerId: winnerId,
-          loserId: loserId,
-        },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-            Accept: "application/json",
-          },
-        }
-      )
-      .then((res) => {
-        console.log("res", res);
-      })
-      .catch((error) => {
-        console.log("ending game error");
-      });
-  };
-
   const render = () => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
-    if (theme === "Retro") {
+    if (state.user.gameTheme === "Retro") {
       drawTable(context, canvas, canvasHeight, canvasWidth, "#000");
       drawRect(
         context,
@@ -178,7 +73,7 @@ export default function InviteMatch({
       );
       drawNet(context, canvas, net.x, net.y, net.width, net.height, net.color);
       drawBall(context, ballX, ballY, "white");
-    } else if (theme === "Blue") {
+    } else if (state.user.gameTheme === "Blue") {
       drawTable(context, canvas, canvasHeight, canvasWidth, "#056CF2");
       drawRect(
         context,
@@ -198,7 +93,7 @@ export default function InviteMatch({
       );
       drawNet(context, canvas, net.x, net.y, net.width, net.height, net.color);
       drawBall(context, ballX, ballY, "white");
-    } else if (theme === "Gray") {
+    } else if (state.user.gameTheme === "Gray") {
       drawTable(context, canvas, canvasHeight, canvasWidth, "#4D5960");
       drawRect(
         context,
@@ -247,18 +142,18 @@ export default function InviteMatch({
     }
   };
 
-  useEffect(() => {
-    const socketIo: Socket = io("http://localhost:3000/game", {
-      auth: {
-        token: cookie.get("USER_ID"),
-      },
-    });
-    setSocket(socketIo);
-    return () => {
-      window?.removeEventListener("keydown", keyPress);
-      socketIo.disconnect();
-    };
-  }, []);
+  // useEffect(() => {
+  //   const socketIo: Socket = io("http://localhost:3000/game", {
+  //     auth: {
+  //       token: cookie.get("USER_ID"),
+  //     },
+  //   });
+  //   setSocket(socketIo);
+  //   return () => {
+  //     window?.removeEventListener("keydown", keyPress);
+  //     socketIo.disconnect();
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (!socket) return;
@@ -266,6 +161,7 @@ export default function InviteMatch({
     socket.emit("InviteFriend", { player: cookie.get("USER_ID"), room: id });
     return () => {
       socket?.disconnect();
+      window?.removeEventListener("keydown", keyPress);
     };
   }, [socket]);
 
@@ -311,13 +207,13 @@ export default function InviteMatch({
       socket.on("CheckingWinner", (data: any) => {
         if (data.player === cookie.get("USER_ID") && data.playerScore === 5) {
           console.log("Winner");
-          upadateTotalWinsAndLoses(data.player, data.opponent);
+          getWinnerAndLoser(data.player, data.opponent);
         } else if (
           data.opponent === cookie.get("USER_ID") &&
           data.opponentScore === 5
         ) {
           console.log("Winner");
-          upadateTotalWinsAndLoses(data.opponent, data.player);
+          getWinnerAndLoser(data.opponent, data.player);
         }
       });
       socket.on("gameStart", () => {
