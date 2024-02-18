@@ -41,14 +41,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private startCountDown(room: string) {
-    this.server.to(room).emit('startCountDown');
-  }
-
-  private updateCountDown(room: string, count: number) {
-    this.server.to(room).emit('updateCountDown', count);
-  }
-
   @SubscribeMessage('InviteFriend')
   async createInviteMatch(socket: Socket, payload: any): Promise<void> {
     try {
@@ -125,10 +117,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('StartRandomMatch')
   async createRandomMatch(socket: Socket, ...args: any[]): Promise<void> {
+    console.log('lets the game start');
     try {
-      let count = 3;
       const playeId: string = socket.handshake.auth.token;
-      console.log('player id', playeId);
       const ObjectPlayer = {
         id: playeId,
         socket: this.mapSocketToPlayer.get(playeId),
@@ -147,16 +138,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const opponent = this.gameQueue.shift(); // player 2
         const room = uuidv4();
         opponent.x = this.canvasWidth - 30;
-        this.startCountDown(room);
-        const intervalId = setInterval(async () => {
-          count--;
-          this.updateCountDown(room, count);
-          if (count === 0) {
-            clearInterval(intervalId);
-          }
-        }, 1000);
         player.socket.join(room);
         opponent.socket.join(room);
+        // console.log('lets the game start');
         // this.server.to(room).emit('gameStart', {});
         this.mapPlayers.set(player.id, player);
         this.mapPlayers.set(opponent.id, opponent);

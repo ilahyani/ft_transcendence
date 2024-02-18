@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -70,22 +69,19 @@ export class UserService {
     };
     try {
       if (params.type === SearchType.USERS) {
-        console.log('users');
         const users = await findUsers(params.query);
         return users;
       } else if (params.type === SearchType.CHANNELS) {
-        console.log('channels');
         const channels = await findChannels(params.query);
         return channels;
       } else {
-        console.log('all');
         const users = await findUsers(params.query);
         const channels = await findChannels(params.query);
         return { users, channels };
       }
     } catch (error) {
       console.log(error);
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -127,7 +123,7 @@ export class UserService {
       });
       return user;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -144,7 +140,7 @@ export class UserService {
       }
       return user.status;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -174,7 +170,7 @@ export class UserService {
       this.gateway.updateStatusEvent(user.id, user.status, friends);
       return 'success';
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -192,7 +188,7 @@ export class UserService {
       });
       return user;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -215,11 +211,10 @@ export class UserService {
       });
       return user;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
-  // verify with the auth method before pushing
   async editAvatar(id: string, avatar: Express.Multer.File) {
     try {
       const user = await this.prisma.user.update({
@@ -227,7 +222,7 @@ export class UserService {
           id,
         },
         data: {
-          avatar: avatar.path,
+          avatar: `http://localhost:3000/uploads/${avatar.filename}`,
         },
       });
       if (!user) {
@@ -235,7 +230,7 @@ export class UserService {
       }
       return { msg: 'success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -295,7 +290,7 @@ export class UserService {
       }
       return { msg: 'success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -314,7 +309,7 @@ export class UserService {
       }
       return { msg: 'success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -342,7 +337,7 @@ export class UserService {
       // console.log(user);
       return user;
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -412,7 +407,7 @@ export class UserService {
       });
       return { msg: 'Success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -448,7 +443,7 @@ export class UserService {
       });
       return { msg: 'Success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -485,7 +480,7 @@ export class UserService {
       });
       return { msg: 'Success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -538,7 +533,7 @@ export class UserService {
       });
       return { msg: 'Success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -586,7 +581,7 @@ export class UserService {
       await this.prisma.$transaction([removeUserA, removeUserB]);
       return { msg: 'Success' };
     } catch {
-      throw new InternalServerErrorException(
+      throw new BadRequestException(
         'Internal Server Error: CannotUnfriendUser',
       );
     }
@@ -672,9 +667,14 @@ export class UserService {
         transactionPromises.push(blockChat);
       }
       await this.prisma.$transaction(transactionPromises);
+      this.notifications.createNotification(userId, {
+        receiverId: userToBlock.id,
+        type: NotificationType.Block,
+        message: ``,
+      });
       return { msg: 'Success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -743,9 +743,14 @@ export class UserService {
         transactionPromises.push(blockChat);
       }
       await this.prisma.$transaction(transactionPromises);
+      this.notifications.createNotification(userId, {
+        receiverId: blockedUser.id,
+        type: NotificationType.unBlock,
+        message: ``,
+      });
       return { msg: 'Success' };
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 }

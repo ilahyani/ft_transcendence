@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import React from "react";
 import AuthContextProvider from "./context/AuthContext";
+import ChatSocketContextProvider from "./context/ChatContext";
 import SocketContextProvider from "./context/SocketContext";
+import GameContextProvider from "./context/GameContext";
 import "./globals.css";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthContextProvider>
           <SocketContextProvider>
-            {children}
+            <GameContextProvider>
+              <ChatSocketContextProvider>{children}</ChatSocketContextProvider>
+            </GameContextProvider>
           </SocketContextProvider>
         </AuthContextProvider>
       </body>

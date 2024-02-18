@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { Socket, io } from "socket.io-client";
+import { useAuth } from "./AuthContext";
 
 const SocketContext = createContext(null);
 
@@ -14,8 +15,7 @@ const SocketContext = createContext(null);
 
 const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
-  const [socketGame, setSocketGame] = useState(null);
-
+  const { fetchFriendsReqData, fetchFriendsData } = useAuth();
   useEffect(() => {
     const newSocket: Socket = io("http://localhost:3000/notifications", {
       auth: {
@@ -27,19 +27,6 @@ const SocketContextProvider = ({ children }) => {
 
     return () => {
       newSocket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const newSocketGame: Socket = io("http://localhost:3000/game", {
-      auth: {
-        token: Cookies.get("USER_ID"),
-      },
-    });
-    setSocketGame(newSocketGame);
-    console.log("SocketGame", newSocketGame);
-    return () => {
-      newSocketGame.disconnect();
     };
   }, []);
 
@@ -62,24 +49,18 @@ const SocketContextProvider = ({ children }) => {
     }
   };
 
-  const JoinRandomGame = () => {
-    if (socketGame) {
-      socketGame.emit("StartRandomMatch");
-    }
-  };
 
   useEffect(() => {
-    // console.log(socket);
     if (socket) {
       socket.on("FriendRequest", (data) => {
-        // console.log({ data });
+        fetchFriendsReqData();
       });
     }
   }, [socket]);
 
   return (
     <SocketContext.Provider
-      value={{ socket, sendMessage, joinRoom, leaveRoom, socketGame, JoinRandomGame }}
+      value={{ socket, sendMessage, joinRoom, leaveRoom }}
     >
       {children}
     </SocketContext.Provider>

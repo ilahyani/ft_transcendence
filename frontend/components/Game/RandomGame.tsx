@@ -1,6 +1,6 @@
 "use client";
 import { useAuth } from "../../app/context/AuthContext";
-import { use, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   drawTable,
   drawRect,
@@ -13,12 +13,12 @@ import {
   Opponent,
   ball,
 } from "./drawutils";
-import { useSocket } from "../../app/context/SocketContext";
+
 
 export default function RandomMatch() {
   const canvaRef = useRef<HTMLCanvasElement>(null);
   const { state } = useAuth();
-  const {socketGame, JoinRandomGame} = useSocket();
+
 
   const render = () => {
     const canvas = canvaRef.current;
@@ -87,14 +87,6 @@ export default function RandomMatch() {
     }
   };
 
-  useEffect(() => {
-    if (socketGame) {
-      JoinRandomGame();
-    }
-    return () => {
-      socketGame.off();
-    };
-  }, []);
 
   useEffect(() => {
     render();

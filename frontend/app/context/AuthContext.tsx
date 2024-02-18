@@ -1,6 +1,5 @@
 "use client";
 import axios from "axios";
-import { url } from "inspector";
 import Cookies from "js-cookie";
 import React, { createContext, useContext, useReducer } from "react";
 
@@ -11,6 +10,8 @@ type AuthContext = {
   status: LoadingStatus;
   user: any;
   profile: any;
+  friendRequests: any;
+  friends: any;
   tfa: "idle" | true | false;
 };
 
@@ -19,6 +20,8 @@ const initialeState: AuthContext = {
   status: "idle",
   user: null,
   profile: null,
+  friendRequests: null,
+  friends: null,
   tfa: "idle",
 };
 
@@ -29,6 +32,8 @@ const actionTypes = {
   TFA: "TFA",
   LOAD_USER_DATA: "LOAD_USER_DATA",
   LOAD_PROFILE_DATA: "LOAD_PROFILE_DATA",
+  LOAD_FRIEND_REQUESTS: "LOAD_FRIEND_REQUESTS",
+  LOAD_FRIENDS: "LOAD_FRIENDS",
 };
 
 const authReducer = (state, action) => {
@@ -55,6 +60,12 @@ const authReducer = (state, action) => {
     case actionTypes.LOAD_PROFILE_DATA: {
       return { ...state, profile: action.payload.profile };
     }
+    case actionTypes.LOAD_FRIEND_REQUESTS: {
+      return { ...state, friendRequests: action.payload.friendRequests };
+    }
+    case actionTypes.LOAD_FRIENDS: {
+      return { ...state, friends: action.payload.friends };
+    }
     default:
       return state;
   }
@@ -66,6 +77,7 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialeState);
 
   const jwt_token = Cookies.get("JWT_TOKEN");
+
   async function fetchData(id: string, isFriendReq?: boolean) {
     try {
       if (jwt_token) {
@@ -97,6 +109,46 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  async function fetchFriendsReqData() {
+    try {
+      if (jwt_token) {
+        let url: string = "http://localhost:3000/user/friendRequests";
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${jwt_token}`,
+          },
+          withCredentials: true,
+        });
+        dispatch({
+          type: actionTypes.LOAD_FRIEND_REQUESTS,
+          payload: { friendRequests: response.data },
+        });
+      } else throw new Error("bad req");
+    } catch (error) {
+      console.log("an error occured");
+    }
+  }
+
+  async function fetchFriendsData() {
+    try {
+      if (jwt_token) {
+        let url: string = "http://localhost:3000/user/friends";
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${jwt_token}`,
+          },
+          withCredentials: true,
+        });
+        dispatch({
+          type: actionTypes.LOAD_FRIENDS,
+          payload: { friends: response.data },
+        });
+      } else throw new Error("bad req");
+    } catch (error) {
+      console.log("an error occured");
+    }
+  }
+
   async function manageFreindReq(id: string, type: string) {
     let reqPath: string;
     if (type === "cancel") {
@@ -120,6 +172,8 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
             withCredentials: true,
           }
         );
+        fetchFriendsReqData();
+        fetchFriendsData();
       }
     } catch (error) {
       console.log("an error occured");
@@ -150,31 +204,12 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
       alert("Failed To Signin");
     }
   }
-
-  async function getWinnerAndLoser(winnerId: string, loserId: string) {
-    try {
-      if (jwt_token) {
-        const response = await axios.post(
-          "http://localhost:3000/game/endGame",
-          {
-            winnerId: winnerId,
-            loserId: loserId,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${jwt_token}`,
-            },
-            withCredentials: true,
-          }
-        );
-        if (response.status === 200) {
-          console.log("Data updated successfully !!!");
-        }
-      }
-    } catch (error) {
-      console.log(`an error occured during game end ${error.message}`);
+  const getUserInfo = (id) => {
+    if (id === state.user.id) return state.user;
+    else {
+      return state.friends?.friends.find((friend) => friend.id === id);
     }
-  }
+  };
 
   const logout = () => {
     dispatch({ type: actionTypes.LOGOUT });
@@ -188,7 +223,9 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         fetchData,
         manageFreindReq,
-        getWinnerAndLoser,
+        fetchFriendsReqData,
+        fetchFriendsData,
+        getUserInfo,
       }}
     >
       {children}
