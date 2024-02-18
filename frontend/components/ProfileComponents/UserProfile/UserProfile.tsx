@@ -43,7 +43,6 @@ function UserProfile() {
   } = useAuth();
 
   useEffect(() => {
-    console.log({user})
     // if (user) {
     //   console.log({ ...user.sentRequests });
     // }

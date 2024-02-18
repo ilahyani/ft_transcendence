@@ -1,6 +1,6 @@
 "use client";
 import { useAuth } from "../../app/context/AuthContext";
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef } from "react";
 import {
   drawTable,
   drawRect,
@@ -13,13 +13,13 @@ import {
   Opponent,
   ball,
 } from "./drawutils";
-import { useSocketGame } from "../../app/context/GameContext";
+import { useSocket } from "../../app/context/SocketContext";
 
 export default function RandomMatch() {
   const canvaRef = useRef<HTMLCanvasElement>(null);
-  const {socket, JoinRandomGame} = useSocketGame();
-  // console.log("RandomMatch", socket.id)
   const { state } = useAuth();
+  const {socketGame, JoinRandomGame} = useSocket();
+
   const render = () => {
     const canvas = canvaRef.current;
     const context = canvas?.getContext("2d");
@@ -88,12 +88,18 @@ export default function RandomMatch() {
   };
 
   useEffect(() => {
-    render();
-  }, [state.user.gameTheme]);
+    if (socketGame) {
+      JoinRandomGame();
+    }
+    return () => {
+      socketGame.off();
+    };
+  }, []);
 
-  if (socket) {
-    JoinRandomGame();
-  }
+  useEffect(() => {
+    render();
+  }, []);
+
 
   return (
     <div className="fixed top-1/2 left-1/2 transform -translate-x-[45%] -translate-y-1/2">

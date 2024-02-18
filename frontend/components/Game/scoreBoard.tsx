@@ -1,12 +1,12 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useSocketGame } from '../../app/context/GameContext';
+// import { useSocketGame } from '../../app/context/GameContext';
 
 
 export default function ScoreBoard( ) {
   const router = useRouter();
-  const { initialState} = useSocketGame();
+  // const { initialState} = useSocketGame();
   return (
     <>
       <div className="flex justify-between items-center p-5 ml-0 my-5  mr-40">

@@ -4,7 +4,7 @@ import React from "react";
 import AuthContextProvider from "./context/AuthContext";
 import SocketContextProvider from "./context/SocketContext";
 import "./globals.css";
-import GameContextProvider from "./context/GameContext";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthContextProvider>
           <SocketContextProvider>
-            <GameContextProvider>{children}</GameContextProvider>
+            {children}
           </SocketContextProvider>
         </AuthContextProvider>
       </body>

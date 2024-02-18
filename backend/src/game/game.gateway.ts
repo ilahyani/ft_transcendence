@@ -123,11 +123,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (error) {}
   }
 
-  @SubscribeMessage('RandomMatch')
+  @SubscribeMessage('StartRandomMatch')
   async createRandomMatch(socket: Socket, ...args: any[]): Promise<void> {
     try {
       let count = 3;
       const playeId: string = socket.handshake.auth.token;
+      console.log('player id', playeId);
       const ObjectPlayer = {
         id: playeId,
         socket: this.mapSocketToPlayer.get(playeId),
@@ -156,7 +157,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }, 1000);
         player.socket.join(room);
         opponent.socket.join(room);
-        this.server.to(room).emit('gameStart', {});
+        // this.server.to(room).emit('gameStart', {});
         this.mapPlayers.set(player.id, player);
         this.mapPlayers.set(opponent.id, opponent);
         this.MapRoomToPlayers.set(room, [player, opponent]);

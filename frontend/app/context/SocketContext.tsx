@@ -14,6 +14,7 @@ const SocketContext = createContext(null);
 
 const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  const [socketGame, setSocketGame] = useState(null);
 
   useEffect(() => {
     const newSocket: Socket = io("http://localhost:3000/notifications", {
@@ -26,6 +27,19 @@ const SocketContextProvider = ({ children }) => {
 
     return () => {
       newSocket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const newSocketGame: Socket = io("http://localhost:3000/game", {
+      auth: {
+        token: Cookies.get("USER_ID"),
+      },
+    });
+    setSocketGame(newSocketGame);
+    console.log("SocketGame", newSocketGame);
+    return () => {
+      newSocketGame.disconnect();
     };
   }, []);
 
@@ -48,7 +62,11 @@ const SocketContextProvider = ({ children }) => {
     }
   };
 
-
+  const JoinRandomGame = () => {
+    if (socketGame) {
+      socketGame.emit("StartRandomMatch");
+    }
+  };
 
   useEffect(() => {
     // console.log(socket);
@@ -61,7 +79,7 @@ const SocketContextProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider
-      value={{ socket, sendMessage, joinRoom, leaveRoom }}
+      value={{ socket, sendMessage, joinRoom, leaveRoom, socketGame, JoinRandomGame }}
     >
       {children}
     </SocketContext.Provider>
