@@ -55,7 +55,7 @@ export default function GamePage() {
               </div>
             </div>
           </div>
-          <div className="hidden 2xl:block m-auto w-full h-full bg-[url('/img/GameIntro.png')] bg-no-repeat bg-center bg-cover rounded-lg" />
+          <div className="hidden 2xl:block m-auto w-full h-full rounded-lg bg-[url('/img/GameIntro.png')] bg-no-repeat bg-center bg-cover" />
         </div>
       </div>
     </>

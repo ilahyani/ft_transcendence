@@ -117,7 +117,6 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('StartRandomMatch')
   async createRandomMatch(socket: Socket, ...args: any[]): Promise<void> {
-    console.log('lets the game start');
     try {
       const playeId: string = socket.handshake.auth.token;
       const ObjectPlayer = {
@@ -214,33 +213,35 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('move')
   movePaddle(client: Socket, payload: any): void {
     const gameRoom = this.MapGames.get(payload.room);
-    if (!gameRoom) return;
-    if (payload.player === gameRoom.player1Obj.id) {
-      if (payload.direction === 'up') {
-        gameRoom.player1Obj.y = Math.max(0, gameRoom.player1Obj.y - 50);
-      } else if (payload.direction === 'down') {
-        gameRoom.player1Obj.y = Math.min(
-          this.canvasHeight - gameRoom.player1Obj.height,
-          gameRoom.player1Obj.y + 50,
-        );
+    if (gameRoom) {
+      // console.log('move');
+      if (payload.player === gameRoom.player1Obj.id) {
+        if (payload.direction === 'up') {
+          gameRoom.player1Obj.y = Math.max(0, gameRoom.player1Obj.y - 50);
+        } else if (payload.direction === 'down') {
+          gameRoom.player1Obj.y = Math.min(
+            this.canvasHeight - gameRoom.player1Obj.height,
+            gameRoom.player1Obj.y + 50,
+          );
+        }
+      } else if (payload.player === gameRoom.player2Obj.id) {
+        if (payload.direction === 'up') {
+          gameRoom.player2Obj.y = Math.max(0, gameRoom.player2Obj.y - 50);
+        } else if (payload.direction === 'down') {
+          gameRoom.player2Obj.y = Math.min(
+            this.canvasHeight - gameRoom.player2Obj.height,
+            gameRoom.player2Obj.y + 50,
+          );
+        }
       }
-    } else if (payload.player === gameRoom.player2Obj.id) {
-      if (payload.direction === 'up') {
-        gameRoom.player2Obj.y = Math.max(0, gameRoom.player2Obj.y - 50);
-      } else if (payload.direction === 'down') {
-        gameRoom.player2Obj.y = Math.min(
-          this.canvasHeight - gameRoom.player2Obj.height,
-          gameRoom.player2Obj.y + 50,
-        );
-      }
+      this.MapGames.set(payload.room, gameRoom);
+      this.server.to(payload.room).emit('PlayerMoved', {
+        player: gameRoom.player1Obj.id,
+        playerY: gameRoom.player1Obj.y,
+        opponent: gameRoom.player2Obj.id,
+        opponentY: gameRoom.player2Obj.y,
+      });
     }
-    this.MapGames.set(payload.room, gameRoom);
-    this.server.to(payload.room).emit('PlayerMoved', {
-      player: gameRoom.player1Obj.id,
-      playerY: gameRoom.player1Obj.y,
-      opponent: gameRoom.player2Obj.id,
-      opponentY: gameRoom.player2Obj.y,
-    });
   }
 
   private handleCollision(playerdetected: any, ball: any) {

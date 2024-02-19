@@ -19,17 +19,21 @@ import { useEffectOnce } from "../../../../CustomHooks/useEffectonce";
 const RandomMatchPage = () => {
   const canvaRef = useRef<HTMLCanvasElement>(null);
   const { socketGame, dispatch, gameState } = useSocketGame();
+  // console.log(gameState, "gameState");
   const { state } = useAuth();
   const render = () => {
     const canvas = canvaRef.current;
     const context = canvas?.getContext("2d");
-    if (!context) return;
+    if (!context) return; 
+    if (!gameState) return;
+    console.log(gameState, "gameState"); // mafih waloo
+    console.log(gameState.ballX, gameState.ballY, "ball") // values makatbdelch
     if (state.user.gameTheme === "Retro") {
       drawTable(context, canvas, canvasHeight, canvasWidth, "#000");
       drawRect(
         context,
         Player.x,
-        Player.y,
+        gameState.playerY,
         Player.width,
         Player.height,
         Player.color
@@ -37,19 +41,19 @@ const RandomMatchPage = () => {
       drawRect(
         context,
         Opponent.x,
-        Opponent.y,
+        gameState.opponentY,
         Opponent.width,
         Opponent.height,
         Opponent.color
       );
       drawNet(context, canvas, net.x, net.y, net.width, net.height, net.color);
-      drawBall(context, ball.x, ball.y, "white");
+      drawBall(context, gameState.ballX, gameState.BallY, "white");
     } else if (state.user.gameTheme === "Blue") {
       drawTable(context, canvas, canvasHeight, canvasWidth, "#056CF2");
       drawRect(
         context,
         Player.x,
-        Player.y,
+        gameState.playerY,
         Player.width,
         Player.height,
         Player.color
@@ -57,19 +61,19 @@ const RandomMatchPage = () => {
       drawRect(
         context,
         Opponent.x,
-        Opponent.y,
+        gameState.opponentY,
         Opponent.width,
         Opponent.height,
         Opponent.color
       );
       drawNet(context, canvas, net.x, net.y, net.width, net.height, net.color);
-      drawBall(context, ball.x, ball.y, "white");
+      drawBall(context, gameState.ballX, gameState.ballY, "white");
     } else if (state.user.gameTheme === "Gray") {
       drawTable(context, canvas, canvasHeight, canvasWidth, "#000");
       drawRect(
         context,
         Player.x,
-        Player.y,
+        gameState.playerY,
         Player.width,
         Player.height,
         Player.color
@@ -77,51 +81,48 @@ const RandomMatchPage = () => {
       drawRect(
         context,
         Opponent.x,
-        Opponent.y,
+        gameState.opponentY,
         Opponent.width,
         Opponent.height,
         Opponent.color
       );
       drawNet(context, canvas, net.x, net.y, net.width, net.height, net.color);
-      drawBall(context, ball.x, ball.y, "white");
+      drawBall(context, gameState.ballX, gameState.ballY, "white");
     }
   };
 
-  useEffect(() => {
+  useEffectOnce(() => {
     render();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const RandomGame = () => {
-    dispatch({ type: "UPDATE_PLAYERS_DATA", payload: gameState.players });
-  };
-
-  const PlayerMoved = () => {
-    dispatch({ type: "UPDATE_PLAYERS_Y", payload: gameState.players });
-  };
-
-  const BallMoved = () => {
-    dispatch({ type: "UPDATE_BALL", payload: gameState.ball });
-  };
-
-  const updateScore = () => {
-    dispatch({ type: "UPDATE_SCORE", payload: gameState.score });
-  };
-
-  useEffect(() => {
-    if (socketGame){
-      socketGame.on("RandomMatch", RandomGame);
-      socketGame.on("PlayerMoved", PlayerMoved);
-      socketGame.on("BallMoved", BallMoved);
-      socketGame.on("updateScore", updateScore);
-    }
     return () => {
-        socketGame.off("RandomMatch", RandomGame);
-        socketGame.off("PlayerMoved", PlayerMoved);
-        socketGame.off("BallMoved", BallMoved);
-        socketGame.off("updateScore", updateScore);
+      if (canvaRef.current) {
+        canvaRef.current.remove();
+      }
     };
-  }, [dispatch]);
+  });
+
+   useEffect(() => {
+    if (!socketGame) return;
+    socketGame.on("RandomMatch", (data) => {
+      dispatch({ type: "UPDATE_PLAYERS_DATA", data });
+    });
+    socketGame.on("PlayerMoved", (data) => {
+      dispatch({ type: "UPDATE_PLAYERS_Y", data });
+    });
+    socketGame.on("BallMoved", (data) => {
+      dispatch({ type: "UPDATE_BALL", data });
+    });
+    socketGame.on("updateScore", (data) => {
+      dispatch({ type: "UPDATE_SCORE", data });
+    });
+    return () => {
+      socketGame.off("RandomMatch");
+      socketGame.off("PlayerMoved");
+      socketGame.off("BallMoved");
+      socketGame.off("updateScore");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socketGame]);
+
 
   useEffectOnce(() => {
     if (socketGame) {
@@ -130,10 +131,10 @@ const RandomMatchPage = () => {
   });
 
   useEffectOnce(() => {
-    if (socketGame) {
-      const keyPress = (e: KeyboardEvent) => {
+    if (socketGame && gameState) {
+      const keyPress = (e: any) => {
         if (e.key === "ArrowUp") {
-          dispatch({ type: "PLAYER_MOVE_UP" });
+          dispatch({ type: "UPDATE_PLAYERS_Y" });
           socketGame.emit("move", {
             player: state.user.id,
             direction: "up",
@@ -141,7 +142,7 @@ const RandomMatchPage = () => {
           });
         }
         if (e.key === "ArrowDown") {
-          dispatch({ type: "PLAYER_MOVE_DOWN" });
+          dispatch({ type: "UPDATE_PLAYERS_Y" });
           socketGame.emit("move", {
             player: state.user.id,
             direction: "down",
@@ -150,11 +151,10 @@ const RandomMatchPage = () => {
         }
       };
       window.addEventListener("keydown", keyPress);
+      return () => {
+        window.removeEventListener("keydown", keyPress);
+      };
     }
-    // return () => {
-    //   window.removeEventListener("keydown", keyPress);
-    // };
-  
   });
 
   return (

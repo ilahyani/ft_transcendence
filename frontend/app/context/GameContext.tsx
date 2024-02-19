@@ -7,9 +7,9 @@ import {
   useEffect,
   useReducer,
   useState,
-  useRef,
 } from "react";
 import { Socket, io } from "socket.io-client";
+
 
 const initialState = {
   playerAvatar: "",
@@ -25,62 +25,37 @@ const GameContext = createContext(null);
 
 function reducer(state, action) {
   const id = Cookies.get("USER_ID");
-  // console.log("action", action?.payload.player);
+  if (!action.data || !state) return;
   switch (action.type) {
     case "UPDATE_PLAYERS_DATA":
       return {
         ...state,
-        playerAvatar:
-          id === action?.payload?.player
-            ? action?.payload?.playerAvatar
-            : action?.payload?.opponentAvatar,
-        opponentAvatar:
-          id === action?.payload?.opponent
-            ? action?.payload?.playerAvatar
-            : action?.payload?.opponentAvatar,
-        playerY:
-          id === action?.payload?.player
-            ? action?.payload?.playerY
-            : action?.payload?.opponentY,
-        opponentY:
-          id === action?.payload?.opponent
-            ? action?.payload?.playerY
-            : action?.payload?.opponentY,
-        room: action?.payload?.room,
+        playerAvatar: action.data.player === id ? action.data.playerAvatr : action.data.opponentAvatar,
+        opponentAvatar: action.data.opponent === id ? action.data.playerAvatr : action.data.opponentAvatar,
+        playerY: action.data.player === id ? action.data.playerY : action.data.opponentY,
+        opponentY: action.data.opponent === id ? action.data.playerY : action.data.opponentY,
+        room: action.data.room,
       };
     case "UPDATE_PLAYERS_Y":
       return {
         ...state,
-        playerY:
-          id === action?.payload?.player
-            ? action?.payload?.playerY
-            : action?.payload?.opponentY,
-        opponentY:
-          id !== action?.payload?.player
-            ? action?.payload?.opponenetY
-            : action?.payload?.playerY,
+        playerY: action.data.player === id ? action.data.playerY : action.data.opponentY,
+        opponentY: action.data.opponent === id ? action.data.playerY : action.data.opponentY,
       };
     case "UPDATE_BALL":
       return {
         ...state,
-        ballX:
-          id === action?.payload?.player
-            ? action?.payload?.x
-            : 1080 - action?.payload?.x,
-        ballY: action?.payload?.y,
+        ballX: action.data.player === id ? action.data.x : 1080 - action.data.x,
+        ballY: action.data.y,
       };
     case "UPDATE_SCORE":
       return {
         ...state,
-        playerScore:
-          id === action?.payload?.player
-            ? action?.payload?.playerScore
-            : action?.payload?.opponentScore,
-        opponentScore:
-          id !== action?.payload?.player
-            ? action?.payload?.playerScore
-            : action?.payload?.opponentScore,
+        playerScore: action.data.player === id ? action.data.playerScore : action.data.opponentScore,
+        opponentScore: action.data.opponent === id ? action.data.playerScore : action.data.opponentScore,
       };
+    default:
+      return state;
   }
 }
 
@@ -125,25 +100,7 @@ const GameContextProvider = ({ children }) => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!socketGame) return;
-    socketGame.on("RandomMatch", (data) => {
-      dispatch({ type: "UPDATE_PLAYERS_DATA", payload: data });
-    });
-    socketGame.on("PlayerMoved", (data) => {
-      // console.log("PlayerMoved", data);
-      dispatch({ type: "UPDATE_PLAYERS_Y", payload: data });
-    });
-    socketGame.on("BallMoved", (data) => {
-      // console.log("BallMoved", data);
-      dispatch({ type: "UPDATE_BALL", payload: data });
-    });
-    socketGame.on("updateScore", (data) => {
-      // console.log("updateScore", data);
-      dispatch({ type: "UPDATE_SCORE", payload: data });
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socketGame]);
+
 
   return (
     <GameContext.Provider
