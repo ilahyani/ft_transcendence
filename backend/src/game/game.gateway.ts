@@ -212,6 +212,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('move')
   movePaddle(client: Socket, payload: any): void {
+    console.log('move', payload);
     const gameRoom = this.MapGames.get(payload.room);
     if (gameRoom) {
       // console.log('move');

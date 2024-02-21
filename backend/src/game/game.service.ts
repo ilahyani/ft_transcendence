@@ -305,4 +305,51 @@ export class GameService {
       throw new BadRequestException('Invalid user data.');
     }
   }
+
+  async getTotalGames(userId: string): Promise<number> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          Playerat: true,
+          Opponentat: true,
+        },
+      });
+      let totalGames = 0;
+      if (user) {
+        totalGames += user.Playerat ? user.Playerat.length : 0;
+        totalGames += user.Opponentat ? user.Opponentat.length : 0;
+      }
+
+      return totalGames;
+    } catch (error) {
+      throw new BadRequestException('Cannot get total games');
+    }
+  }
+
+  async getTotalAchievement(userId: string): Promise<number> {
+    const userWithAchievements = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        achievements: true,
+      },
+    });
+
+    if (!userWithAchievements || !userWithAchievements.achievements) {
+      return 0;
+    }
+
+    const achievements = userWithAchievements.achievements;
+    let count = 0;
+    for (const key of Object.keys(achievements)) {
+      if (achievements[key] === true) {
+        count += 1;
+      }
+    }
+    return count;
+  }
 }

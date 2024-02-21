@@ -14,12 +14,13 @@ import { Socket, io } from "socket.io-client";
 const initialState = {
   playerAvatar: "",
   opponentAvatar: "",
-  playerY: "",
-  opponentY: "",
+  playerY: 0,
+  opponentY: 0,
   room: "",
   ballX: 0,
   ballY: 0,
 };
+
 
 const GameContext = createContext(null);
 
@@ -37,10 +38,14 @@ function reducer(state, action) {
         room: action.data.room,
       };
     case "UPDATE_PLAYERS_Y":
+      console.log(action.data);
+      if (action.data.playerY === undefined || action.data.opponentY === undefined) {
+        return state;
+      }
       return {
         ...state,
         playerY: action.data.player === id ? action.data.playerY : action.data.opponentY,
-        opponentY: action.data.opponent === id ? action.data.playerY : action.data.opponentY,
+        opponentY: action.data.opponent === id ? action.data.opponentY : action.data.playerY,
       };
     case "UPDATE_BALL":
       return {
@@ -100,8 +105,30 @@ const GameContextProvider = ({ children }) => {
     };
   }, []);
 
-
-
+  useEffect(() => {
+    if (!socketGame) return;
+    socketGame.on("RandomMatch", (data) => {
+      // console.log("RandomMatch", data);
+      dispatch({ type: "UPDATE_PLAYERS_DATA", data });
+    });
+    socketGame.on("PlayerMoved", (data) => {
+      console.log("PlayerMoved", data);
+      dispatch({ type: "UPDATE_PLAYERS_Y", data });
+    });
+    socketGame.on("BallMoved", (data) => {
+      dispatch({ type: "UPDATE_BALL", data });
+    });
+    socketGame.on("updateScore", (data) => {
+      dispatch({ type: "UPDATE_SCORE", data });
+    });
+    return () => {
+      socketGame.off("RandomMatch");
+      socketGame.off("PlayerMoved");
+      socketGame.off("BallMoved");
+      socketGame.off("updateScore");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socketGame]);
   return (
     <GameContext.Provider
       value={{

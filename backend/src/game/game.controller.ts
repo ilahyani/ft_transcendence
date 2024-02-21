@@ -97,4 +97,22 @@ export class GameController {
       throw new BadRequestException('Invalid user data.');
     }
   }
+
+  @Get('TotalGames/:id')
+  async getTotalGames(@Param() param: any) {
+    if (param.id) {
+      return this.gameService.getTotalGames(param.id);
+    } else {
+      throw new BadRequestException('Invalid user data.');
+    }
+  }
+
+  @Get('TotalAchievement/:id')
+  async getTotalAchievement(@Param() param: any) {
+    if (param.id) {
+      return this.gameService.getTotalAchievement(param.id);
+    } else {
+      throw new BadRequestException('Invalid user data.');
+    }
+  }
 }
