@@ -26,6 +26,22 @@ function AllField({ usersData }: ModalSearch) {
     positiosn: false,
   };
 
+<<<<<<< Updated upstream
+=======
+  const {
+    setSelectedChat,
+    getChannelByID,
+    state: { allChats },
+  } = useChat();
+  function handleClickCahnnels(id: string) {
+    getChannelByID(id).then((res) => {});
+    if (allChats.find((chat) => chat.id === id)) {
+      router.push(`/chat`);
+      setSelectedChat(id);
+    }
+  }
+
+>>>>>>> Stashed changes
   function handleClick(id: string) {
     if (all.id != id) router.push(`/profile/${id}`);
   }

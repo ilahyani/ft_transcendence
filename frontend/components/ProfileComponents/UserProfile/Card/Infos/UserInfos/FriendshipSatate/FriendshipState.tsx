@@ -13,9 +13,16 @@ import { useParams } from "next/navigation";
 type props = {
   setBlocker: any;
   setBlocked: any;
+<<<<<<< Updated upstream
 };
 
 function FriendshipState({setBlocker, setBlocked}: props) {
+=======
+  id?: any;
+};
+
+function FriendshipState({ setBlocker, setBlocked, id }: props) {
+>>>>>>> Stashed changes
   const param = useParams();
   const {
     fetchFriendsReqData,
@@ -57,7 +64,20 @@ function FriendshipState({setBlocker, setBlocked}: props) {
     <div className="w-full">
       {buttonType === "add" && profile.id != user.id && (
         <div className="flex justify-center flex-row gap-3">
+<<<<<<< Updated upstream
           <AddFriend card={false} setBlocked={setBlocked} setBlocker={setBlocker} /> <BlockUser isFriend={false}  setBlocker={setBlocker}/>
+=======
+          <AddFriend
+            card={false}
+            setBlocked={setBlocked}
+            setBlocker={setBlocker}
+          />{" "}
+          <BlockUser
+            isFriend={false}
+            setBlocker={setBlocker}
+            id={param.id ? param.id : id ? id : undefined}
+          />
+>>>>>>> Stashed changes
         </div>
       )}
       {buttonType === "cancel" && profile.id != user.id && (
@@ -72,9 +92,22 @@ function FriendshipState({setBlocker, setBlocked}: props) {
       )}
       {buttonType === "challenge" && profile.id != user.id && (
         <div className="flex justify-center flex-row gap-2">
+<<<<<<< Updated upstream
           <ChallengeFriend isFriendCard={false} />
           <MessageFriend isFriendCard={false} />
           <BlockUser isFriend={true} setBlocker={setBlocker} />
+=======
+          <ChallengeFriend
+            isFriendCard={false}
+            id={param.id ? param.id : id ? id : undefined}
+          />
+          <MessageFriend isFriendCard={false} />
+          <BlockUser
+            isFriend={true}
+            setBlocker={setBlocker}
+            id={param.id ? param.id : id ? id : undefined}
+          />
+>>>>>>> Stashed changes
         </div>
       )}
       {buttonType === "unblock" && profile.id != user.id && (

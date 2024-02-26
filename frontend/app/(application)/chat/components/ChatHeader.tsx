@@ -10,13 +10,11 @@ import Button from "./Button";
 import { newChannelActionTypes, newChannelReducer } from "./CreateNewChat";
 import NewChannel from "./NewChannel";
 
-const ChatHeader = ({ headerInfo: { avatar, name }, chat }) => {
+const ChatHeader = ({ headerInfo, chat }) => {
+  const { avatar, name } = headerInfo;
   const modalRef = useRef();
   const {
-    state: {
-      friends: { friends },
-      user,
-    },
+    state: { user },
   } = useAuth();
   const [state, dispatch] = useReducer(
     newChannelReducer,
@@ -53,20 +51,22 @@ const ChatHeader = ({ headerInfo: { avatar, name }, chat }) => {
   useEffect(() => {
     if (chat.name) {
       let c = allChats.find((cha) => chat.id === cha.id);
-      dispatch({
-        type: newChannelActionTypes.UPDATE_STATE,
-        payload: {
-          avatar: c.image,
-          channelName: c.name,
-          type: c.type === "PUBLIC" ? 0 : c.type === "PROTECTED" ? 1 : 2,
-          members: c.Members.filter((elem) => elem.id !== user.id).map(
-            (elem) => elem.id
-          ),
-          password: c?.password,
-        },
-      });
+      if (c)
+        dispatch({
+          type: newChannelActionTypes.UPDATE_STATE,
+          payload: {
+            avatar: c.image,
+            channelName: c.name,
+            type: c.type === "PUBLIC" ? 0 : c.type === "PROTECTED" ? 1 : 2,
+            members: c.Members.filter((elem) => elem.id !== user.id).map(
+              (elem) => elem.id
+            ),
+            password: c?.password,
+          },
+        });
     }
   }, [chat, allChats, channel]);
+<<<<<<< Updated upstream
   const NewChannelActions = !chat.name ? (
     <></>
   ) : (
@@ -107,6 +107,25 @@ const ChatHeader = ({ headerInfo: { avatar, name }, chat }) => {
                     : "PRIVATE",
                   state.password
                 )
+=======
+  const NewChannelActions =
+    !chat.name || !state ? (
+      <></>
+    ) : (
+      <>
+        {/* <Button content="Cancel" onClick={() => setStep(0)} /> */}
+        <Button
+          type="primary"
+          content="Update"
+          disabled={
+            state.channelName < 3 || (state.password < 6 && state.type === 1)
+          }
+          onClick={async () => {
+            try {
+              let mem = allChats.find((c) => c.id === chat.id);
+              let newMembers = state.members.filter(
+                (elem) => !mem.Members.find((l) => l.id === elem)
+>>>>>>> Stashed changes
               );
             arr.push(updateChannelAvatar(chat.id, state.avatar));
             if (kickedMembers.length !== 0)
@@ -116,6 +135,7 @@ const ChatHeader = ({ headerInfo: { avatar, name }, chat }) => {
                   kickedMembers.map((elem) => elem.id)
                 )
               );
+<<<<<<< Updated upstream
             if (addMembers.length !== 0)
               arr.push(addMembers(chat.id, newMembers));
             Promise.all(arr).then(() => {
@@ -127,6 +147,46 @@ const ChatHeader = ({ headerInfo: { avatar, name }, chat }) => {
       />
     </>
   );
+=======
+              let arr = [];
+              if (chat.name !== state.name)
+                arr.push(updateChannelName(chat.id, state.channelName));
+              if (
+                (chat.type === "PUBLIC" && state.type !== 0) ||
+                (chat.type === "PROTECTED" && state.type !== 1) ||
+                (chat.type === "PRIVATE" && state.type !== 2)
+              )
+                arr.push(
+                  updateChannelType(
+                    chat.id,
+                    state.type === 0
+                      ? "PUBLIC"
+                      : state.type === 1
+                      ? "PROTECTED"
+                      : "PRIVATE",
+                    state.password
+                  )
+                );
+              arr.push(updateChannelAvatar(chat.id, state.avatar));
+              if (kickedMembers.length !== 0)
+                arr.push(
+                  kick(
+                    chat.id,
+                    kickedMembers.map((elem) => elem.id)
+                  )
+                );
+              if (addMembers.length !== 0)
+                arr.push(addMembers(chat.id, newMembers));
+              Promise.all(arr).then(() => {
+                getAllChats();
+              });
+              closeModal();
+            } catch {}
+          }}
+        />
+      </>
+    );
+>>>>>>> Stashed changes
   function openModel() {
     modalRef?.current?.showModal();
   }

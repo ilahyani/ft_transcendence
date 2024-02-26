@@ -6,6 +6,7 @@ import Achievements from "./Infos/Achievements/UserAchievements";
 import Scores from "./Infos/Scores/Scores";
 import FriendshipState from "./Infos/UserInfos/FriendshipSatate/FriendshipState";
 import { useParams } from "next/navigation";
+import { useChat } from "../../../../app/context/ChatContext";
 
 type props = {
   setBlocker: any;
@@ -21,7 +22,7 @@ function UserCard({ setBlocker, setBlocked }: props) {
   const param = useParams();
 
   const avatarObj: AvatarProps = {
-    src: profile.avatar,
+    src: profile?.avatar,
     width: 100,
     height: 100,
     userName: profile.username,
@@ -29,12 +30,17 @@ function UserCard({ setBlocker, setBlocked }: props) {
     fontSize: "text-2xl font-bold",
     positiosn: true,
     existStatos: true,
-    statos: profile.status,
+    statos: profile?.status,
   };
 
   useEffect(() => {
+<<<<<<< Updated upstream
     fetchData(param.id);
   }, []);
+=======
+    fetchData(param.id ? param.id : id ? id : undefined);
+  }, [profile]);
+>>>>>>> Stashed changes
 
   return (
     <div className="w-[22rem] h-full p-[0.5rem] text-white flex flex-col border border-black border-solid rounded-[15px]">
@@ -42,7 +48,15 @@ function UserCard({ setBlocker, setBlocked }: props) {
         <div className="w-full flex justify-center items-center">
           <Avatar avatarObj={avatarObj} />
         </div>
+<<<<<<< Updated upstream
         <FriendshipState setBlocker={setBlocker} setBlocked={setBlocked} />
+=======
+        <FriendshipState
+          setBlocker={setBlocker}
+          setBlocked={setBlocked}
+          id={param.id ? param.id : id ? id : undefined}
+        />
+>>>>>>> Stashed changes
         <Scores />
         <Achievements />
       </div>

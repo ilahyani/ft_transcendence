@@ -268,6 +268,34 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
       alert("Failed To Signin");
     }
   }
+<<<<<<< Updated upstream
+=======
+
+  async function changeStatus({ status }) {
+    // if (! statos || statos === "PLAYING") {
+    //   statos = "PLAYING";
+    // }
+    try {
+      if (jwt_token) {
+        const res = await axios.patch(
+          "http://localhost:3000/user/status/update",
+          {
+            status,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${jwt_token}`,
+            },
+            withCredentials: true,
+          }
+        );
+      } else throw new Error("bad req");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+>>>>>>> Stashed changes
   const getUserInfo = (id) => {
     if (id === state.user.id) return state.user;
     else {
@@ -278,6 +306,7 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
   const AcceptGameRequest = async () => {
     if (jwt_token) {
       await axios
+<<<<<<< Updated upstream
         .post(`http://localhost:3000/game/accept/${Cookies.get("USER_ID")}`,)
         .then((res) => {
           console.log(res);
@@ -285,12 +314,18 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
         .catch((err) => {
           console.log(err);
         });
+=======
+        .post(`http://localhost:3000/game/accept/${Cookies.get("USER_ID")}`)
+        .then((res) => {})
+        .catch((err) => {});
+>>>>>>> Stashed changes
     }
   };
 
   const RefuseGameRequest = async () => {
     if (jwt_token) {
       await axios
+<<<<<<< Updated upstream
         .post(`http://localhost:3000/game/refuse/${Cookies.get("USER_ID")}`,)
         .then((res) => {
           console.log(res);
@@ -298,6 +333,11 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
         .catch((err) => {
           console.log(err);
         });
+=======
+        .post(`http://localhost:3000/game/refuse/${Cookies.get("USER_ID")}`)
+        .then((res) => {})
+        .catch((err) => {});
+>>>>>>> Stashed changes
     }
   };
 
@@ -317,9 +357,13 @@ const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
             },
           }
         )
+<<<<<<< Updated upstream
         .then((res) => {
           console.log(res);
         })
+=======
+        .then((res) => {})
+>>>>>>> Stashed changes
         .catch((error) => {
           console.log(error.response.data);
         });

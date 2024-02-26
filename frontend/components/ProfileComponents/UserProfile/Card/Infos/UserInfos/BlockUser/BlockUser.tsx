@@ -4,6 +4,7 @@ import { useAuth } from "../../../../../../../app/context/AuthContext";
 import Cookies from "js-cookie";
 import axios from "axios";
 import BlockIcon from "./BlockIcon";
+import { useChat } from "../../../../../../../app/context/ChatContext";
 
 type props = {
   isFriend: boolean;
@@ -13,7 +14,7 @@ type props = {
 function BlockUser({ isFriend, setBlocker }: props) {
   const param = useParams();
   const { fetchFriendsData, fetchData } = useAuth();
-
+  const { setSelectedChat } = useChat();
   async function blockSate(id: string | string[]) {
     const jwt_token = Cookies.get("JWT_TOKEN");
     try {
@@ -44,7 +45,12 @@ function BlockUser({ isFriend, setBlocker }: props) {
   }
 
   function blockUser() {
+<<<<<<< Updated upstream
     blockSate(param.id);
+=======
+    blockSate(param.id ? param.id : id ? id : undefined);
+    setSelectedChat("");
+>>>>>>> Stashed changes
   }
 
   const className1: string =

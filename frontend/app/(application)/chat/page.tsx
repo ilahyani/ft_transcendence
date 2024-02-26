@@ -36,16 +36,21 @@ const Chat = () => {
     state: { allChats },
   } = useChat();
   const {
+<<<<<<< Updated upstream
     state: {
       friends: { friends },
       user,
     },
+=======
+    fetchData,
+    state: { friends, user, profile },
+>>>>>>> Stashed changes
   } = useAuth();
   const chat = useMemo(() => {
     return allChats.find((chat) => chat.id === selectedChat);
   }, [friends, selectedChat]);
   const headerInfo = useMemo(() => {
-    if (selectedChat) {
+    if (selectedChat && chat) {
       if (chat?.name) {
         return { name: chat.name, avatar: chat.image };
       } else {
@@ -54,7 +59,19 @@ const Chat = () => {
             friend.id ===
             (user.id !== chat.user2Id ? chat.user2Id : chat.user1Id)
         );
+<<<<<<< Updated upstream
         return { name: friend.username, avatar: friend.avatar, id: friend.id };
+=======
+        if (!friend) {
+          setSelectedChat("");
+          return {};
+        }
+        return {
+          name: friend.username,
+          avatar: friend.avatar,
+          id: friend.id,
+        };
+>>>>>>> Stashed changes
       }
     }
     return null;
@@ -81,6 +98,7 @@ const Chat = () => {
   }
 
   useEffect(() => {
+<<<<<<< Updated upstream
     if (allChats.find((chat) => chat.id === selectedChat)?.name)
       fetchChannelData();
   }, [selectedChat, allChats]);
@@ -115,9 +133,75 @@ const Chat = () => {
             <ManageChatBar chat={chat} />
           </div>
         )}
+=======
+    // fetchData(user.id !== chat?.user2Id ? chat?.user2Id : chat.user1Id);
+    if (
+      user.blockedByUsers.find(
+        (elem) =>
+          elem.id === (user.id !== chat?.user2Id ? chat?.user2Id : chat.user1Id)
+      )
+    ) {
+      setBlocked(true);
+    }
+    if (
+      user.blockedUsers.find(
+        (elem) =>
+          elem.id === (user.id !== chat?.user2Id ? chat?.user2Id : chat.user1Id)
+      )
+    ) {
+      setBlocker(true);
+    }
+    if (allChats.find((chat) => chat.id === selectedChat)?.name)
+      fetchChannelData();
+  }, [selectedChat, allChats]);
+
+  const content =
+    !selectedChat || !headerInfo ? (
+      <NoneSelected />
+    ) : (
+      <div className="w-3/4 grow">
+        {headerInfo && <ChatHeader headerInfo={headerInfo} chat={chat} />}
+        {/* <div className="flex"> */}
+        <div className="flex">
+          <div className="flex w-full flex-col">
+            <ChatBody selectedChat={selectedChat} />
+            <form
+              onSubmit={submitMessage}
+              className="w-full flex relative border-t border-black"
+            >
+              <input
+                disabled={isDisabled}
+                value={message}
+                className="w-[80%] h-[60px] bg-transparent p-5 text-gray-50"
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="send message"
+              ></input>
+              <button
+                type="submit"
+                className="absolute inset-y-1/4 right-10 text-white"
+              >
+                send
+              </button>
+            </form>
+            {/* </div> */}
+          </div>
+          {chat?.name ? (
+            <div className=" h-full border-l border-black manage_bar-height min-w-[250px] ">
+              <ManageChatBar chat={chat} />
+            </div>
+          ) : (
+            <div className="mt-[81px]">
+              <UserCard
+                setBlocker={setBlocker}
+                setBlocked={setBlocked}
+                id={user.id !== chat?.user2Id ? chat?.user2Id : chat.user1Id}
+              />
+            </div>
+          )}
+        </div>
+>>>>>>> Stashed changes
       </div>
-    </div>
-  );
+    );
   return (
     <>
       <div className="grow min-w-[300px] border-r border-black">
@@ -126,7 +210,7 @@ const Chat = () => {
           setSelectedChat={setSelectedChat}
         />
       </div>
-      {content}
+      {!selectedChat ? <NoneSelected /> : content}
     </>
   );
 };
