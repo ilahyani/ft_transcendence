@@ -41,11 +41,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage('leaveTheRandomGame')
-  handelLeaveTheRandomGame(socket :Socket, data : any)
+  @SubscribeMessage('leaveBeforeStart')
+  handleleaveBeforeStart(socket :Socket, data: any)
   {
-    console.log('the client leave the game before it start', socket.id);
+    // console.log('one player leave the room before start the game : [[[[1111]]]]]');
+    // console.log('th queue in the game ', this.gameQueue);
     this.gameQueue.shift();
+    this.gameQueue.shift();
+    // console.log('th queue in the game ', this.gameQueue);
   }
 
   @SubscribeMessage('InviteFriend')
@@ -158,8 +161,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('RandomMatch')
   async createRandomMatch(socket: Socket, ...args: any[]): Promise<void> {
-    console.log('the player in the queue in the enter of the game [[[[[[333333]]]]', this.gameQueue);
-    console.log('the game queue lenght is :: ', this.gameQueue.length);
+    // console.log('the player in the queue in the enter of the game [[[[[[333333]]]]', this.gameQueue);
+    // console.log('the game queue lenght is :: ', this.gameQueue.length);
     
     try {
       const playeId: string = socket.handshake.auth.token;
@@ -174,13 +177,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         height: 150,
       };
       if (!this.gameQueue.some((player) => player.id === ObjectPlayer.id)) {
-        console.log('the player pushed to the queue [[6666666]]', this.gameQueue);        
+        // console.log('the player pushed to the queue [[6666666]]', this.gameQueue);        
         this.gameQueue.push(ObjectPlayer);
-        console.log('the player pushed to the queue [[7777777]]', this.gameQueue);
+        // console.log('the player pushed to the queue [[7777777]]', this.gameQueue);
       }
       if (this.gameQueue.length === 2) {
-        console.log('[[[44444444]]]] the queue lenght iis : ', this.gameQueue.length);
-        console.log('[[[55555555]]]] the queue iis : ', this.gameQueue);
+        // console.log('[[[44444444]]]] the queue lenght iis : ', this.gameQueue.length);
+        // console.log('[[[55555555]]]] the queue iis : ', this.gameQueue);
         
         const player = this.gameQueue.shift();
         const opponent = this.gameQueue.shift();
