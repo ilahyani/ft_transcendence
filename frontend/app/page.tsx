@@ -11,7 +11,7 @@ export default function Home() {
         <h5 className="text-md pb-8 text-textSecondary text-center px-2">
           {"🎮 IT'S LEVELS, IT'S LAYERS, SO PRAY FOR THE PLAYERS 🎮"}
         </h5>
-        <Link href={"/profile"}>
+        <Link href={"/auth/login"}>
           <button className="block bg-accent text-text px-6 py-3 rounded-lg font-bold">
             {"LET'S GO 🚀"}
           </button>

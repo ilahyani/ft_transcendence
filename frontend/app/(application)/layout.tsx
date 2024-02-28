@@ -8,14 +8,16 @@ import SocketContextProvider, { useSocket } from "../context/SocketContext";
 import ChallengePopUp from "../../components/Game/ChallengePopUp";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import ChatSocketContextProvider from "../context/ChatContext";
-import { io } from "socket.io-client";
+import {io} from 'socket.io-client'
+
 
 const ChallengNotif = () => {
   const { notifications, sender } = useSocket();
-  return <> {notifications && <ChallengePopUp sender={sender} />}</>;
-};
+  return <>  {notifications && <ChallengePopUp sender={sender} />}</>
 
-const socket = io("http://localhost:3000/game");
+}
+
+const socket = io('http://localhost:3000/game')
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [active, setActive] = useState<string>("");
@@ -32,6 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     state: { profile, user },
   } = useAuth();
 
+
   useEffect(() => {
     if (locations.includes(location.split("/")[1])) {
       setActive(location.split("/")[1]);
@@ -40,18 +43,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [location]);
 
-  // useEffect(() => {
-  //   return () => {
-  //     console.log("[[[[000000000]]]]the emit of the refresh in the layout");
-  //     socket.emit("leaveBeforeStart");
-  //   };
-  // }, []);
+  useEffect(() => {
+    
+    return (() => {
+      console.log('[[[[000000000]]]]the emit of the refresh in the layout');
+      socket.emit('leaveBeforeStart')
+    })  
+  })
 
   useEffect(() => {
     fetchData();
     fetchFriendsReqData();
     fetchFriendsData();
-  });
+  }, []);
 
   return (
     <ProtectedRoute>
@@ -63,9 +67,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <ChallengNotif />
             {profile && children}
-          </div>
-        </SocketContextProvider>
+          </div></SocketContextProvider>
       </ChatSocketContextProvider>
+
     </ProtectedRoute>
   );
 }
+
+
